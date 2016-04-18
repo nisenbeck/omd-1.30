@@ -14,8 +14,8 @@ http://omdistro.org
 
 About this armhf Port
 --------------
-This package is based on the vanilla sources for the official releases
-which can be downloaded at http://files.omdistro.org/releases/sources/
+This package is based on the official sources of OMD 1.30:
+http://git.mathias-kettner.de/omd.git/ (tags/v1.30)
 
 It requires at least an ARMv7 CPU and will not run on the Raspberry Pi
 (which is ARMv6).
