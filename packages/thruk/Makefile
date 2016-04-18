@@ -34,7 +34,8 @@ install:
 	if [ `uname -m` = 'x86_64' ]; then \
 		cp -p wkhtmltopdf-amd64 $(DESTDIR)$(OMD_ROOT)/bin/wkhtmltopdf; \
 	else \
-		cp -p wkhtmltopdf-i386  $(DESTDIR)$(OMD_ROOT)/bin/wkhtmltopdf; \
+		#cp -p wkhtmltopdf-i386  $(DESTDIR)$(OMD_ROOT)/bin/wkhtmltopdf; \
+		cp -p wkhtmltopdf-armhf  $(DESTDIR)$(OMD_ROOT)/bin/wkhtmltopdf; \
 	fi
 	mkdir -p $(DESTDIR)$(OMD_ROOT)/lib/omd/scripts/post-update
 	install -m 755 thruk.post-update $(DESTDIR)$(OMD_ROOT)/lib/omd/scripts/post-update/thruk
