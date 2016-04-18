@@ -1,0 +1,349 @@
+This file documents the revision history for the Open Monitoring Distribution
+
+1.30     Oct 01 2014
+          - omd:
+            - Added "Basic / ADMIN_MAIL" hook to configure the target mail
+              address for eMails sent to the site user (e.g. created by
+              crontab). Finally this generates the ~/.forward file within
+              the sites directory. When a mail address is configured, the
+              file is written, when you have none configured, the file is
+              deleted.
+              If you already have a ~/.forward file, the mail address will
+              automatically be used as ADMIN_MAIL value.
+            - Added backup/restore modes to backup and restore sites completely
+              You can backup your sites and restore them with the same or a
+              different name.
+
+              Example:
+                omd backup mysite /tmp/backup.tgz
+
+              And for restore use:
+                omd restore restored /tmp/backup.tgz
+
+              You need to ensure you have the OMD version installed during
+              restore, which the site was using during backup.
+
+              You can also backup to stdout and restore from stdin which means
+              you can stream a backup cross the network. This might not only
+              be useful for backups, but also for migrations across servers.
+            - FIX: Update mechanism detects obsolete but non empty directories
+              correctly and asks the user whether or not to delete them
+            - FIX: SLES omd init-Script does not use default runlevel 4 anymore
+            - FIX: Added PYTHONPATH to site crontab for being able to access
+              the sites python modules as when run in interactive mdoe
+          - NagVis:
+            - Update to version 1.8.5
+            - Removed deprecated directory var/nagvis/userfiles. This was
+              deprecated since version 0.52. During the update to 1.30, the
+              directory and all its contents will be removed. This should be
+              no problem for most users, because the directory is not used
+              anymore since a long time.
+              If you update from OMD 0.52 or below, you need to manually backup
+              files from var/nagvis/userfiles and copy them to
+              local/share/nagvis/htdocs/userfiles after the update to make them
+              available again.
+              Note: If you decide to downgrade from this or a following
+              version to version 0.52 or older, you will again need to care
+              about these files manually.
+            - FIX: The nagvis URLs were not correctly linking to e.g. Check_MK
+              when a site has been created with Check_MK as default GUI
+            - FIX: Fixed site not starting after "omd cp" when using 
+              the arguments --no-past, --no-rrds or --no-logs
+          - Check_MK:
+            - Update to 1.2.6p12
+            - moved log dir to var/log
+          - Added build support for SLES 12, 11 SP4
+          - Added build support for Ubuntu 14.10, 15.04, 15.10
+          - Added build support for Debian 8
+          - RedHat / CentOS: Builds are now only dedicated to the major
+            version, not caring about the minor versions anymore
+          - Mod-Gearman: Update 1.5.5
+          - Thruk: Update to 2.02
+            - fix pnp ssi files
+          - Gearman: Updated to version 0.33-4
+          - PNP4Nagios: Update to 0.6.25
+          - Updated Monitoring-Plugins to 2.1.1
+          - Icinga: Update to 1.12.0
+          - updated to nail/mailx 12.5
+          - rrdtool: Update to 1.5.4
+          - apache:
+            - mod_fcgid: update to 2.3.9, sles 11 and centos 5/6 only
+            - set graceful restart timeout
+            - Default redirects from /[site] and /[site]/ to /[site]/omd/ are
+              are now preserving the original requested protocol (http/https).
+              When using the apache shared mode (which is the default), having
+              the system apache service the pages via HTTPS, you will need to
+              configure the system apache to provide the X-Forwarded-Proto
+              request header to the site apache, which can be done by
+              adding the line 'RequestHeader set X-Forwarded-Proto "https"' to
+              the proxy configuration related to the site.
+            - Apache is now using the default site profile (e.g. PATH)
+          - Dokuwiki
+            - Updated to Version 2014-09-29d
+            - fix discarding all local settings on update
+          - check_webinject: Update to 1.88
+
+1.20     Aug 25 2014
+          - apache: Changed order of apache daemon startup/stopping
+            The webserver is now started after the monitoring core, but more
+            important, it is now stopped after the core. This should reduce
+            the time needed to bring down all worker processes, since there
+            are no hanging livestatus connections started by web clients anymore.
+          - debian packge: Removed non existant URL from changelog
+          - perl-modules:
+            - Added missing semikolon to fix syntax error
+            - Added Monitoring-Plugin module
+          - omd:
+            - Added --apache-reload flag to omd create/rm for executing a
+              reload of the system apache instead of a restart
+            - Added nagios/icinga reload init hooks
+            - Added --tmpfs-size/-t option to omd create/mv/cp for specifying
+              an explicit maximum size for the sites tmpfs
+            - FIX: Providing correct exit codes when running "omd status"
+            - FIX: exit with 2 (partially running) when only some of the
+              sites are running or partially running using "omd status"
+            - FIX: Reducing duplicate config writes during site creation
+          - Init scripts return exit 0 when executing start and daemon is
+            already running (Modified nagios, apache and rrdcached scripts)
+          - diskspace: Fixed error messages in syslog which were caused by
+            exit codes of 3 when diskspace cleanup has not been configured
+          - FIX: Fixed logrotation when var/tmp does not exist
+            (seem to only be created when xinetd had been enabled before within a site)
+          - Check_MK/MK Livestatus: new version 1.2.4p5
+          - Thruk: Update to 1.84-6
+          - PNP4Nagios: Update to 0.6.24
+          - Icinga: Update to 1.11.4
+          - NagVis: Update to 1.8b6
+          - Dokuwiki: Fixed integration with multisite cookie authentication
+          - Added build support for Ubuntu 14.04
+          - Added build support for CentOS 7.0
+          - New command lc for sending a core command via Livestatus, e.g.
+            lc ENABLE_NOTIFICATIONS
+          - Updated Monitoring-Plugins to 2.0
+
+1.10     Dec 15 2013
+          - omd: More friendly error messages when init scripts do not exist
+          - omd: Added option to execute scripts during site creation by putting
+            files to ~/lib/omd/scripts/post-create
+          - python modules: added pysnmp and pyasn1 modules
+          - rrdtool: Also deliver python bindings
+          - rrdcached is now logging to ~/var/log/rrdcached.log
+          - added missing logrotation config for ~/var/log/xinetd.log
+          - added "diskspace" program which is meant to cleanup too old files
+            which are not needed/wanted anymore and are not handled by regular
+            logrotate (like e.g. the nagios archive). Is callec automatically
+            every hour when the OMD crontab is enabled. This can be changed by
+            editing the cron config etc/cron.d/diskspace
+          - Thruk: Update to 1.80-3
+          - Mod-Gearman: Update 1.4.14
+          - Nagios: Init script kills whole process groups during "stop"
+          - check_webinject: Update to 1.86
+          - gearmand: increase open files limit
+          - Fix bug on Debian/Ubuntu where start/stop script started/stopped
+             sites multiple times
+          - cleanup checkresults dir of Nagios when (re-)starting Nagios
+          - Init scripts can now deal with upstart user sessions, where the
+            PPID is not 1 anymore, instead of it the PPID is the user session
+            init process (init --user). This was first seen on ubuntu 13.10.
+          - Added build support on Ubuntu 13.10 (Saucy Salamander)
+          - Check_MK/MK Livestatus: new version 1.2.2p3
+          - NagVis: Update to 1.8b4
+          - Nagios Plugins: Update to 1.5
+          - Support builds on CentOS/RedHat 5.10
+
+1.00     Jun 17 2013
+          - Nagios: Update to 3.5.0
+          - Icinga: Update to 1.9.1
+          - Thruk: Update to 1.72-2
+            - added cookie based login
+          - Apache: Enabling mod_status (if available) for 127.0.0.1 in own mode
+          - Check_MK/MK Livestatus:
+            - new version 1.2.2p2
+            - integrated Event Console
+            - Changed path for check manpages from share/doc/check_mk/checks
+              to share/check_mk/checkman to match the local/ path
+            - Installing livestatus python API module now
+            - Added config hook MULTISITE_AUTHORISATION to control some user
+              permissions in NagVis and pnp4nagios via multisite permissions
+          - NagVis: Update to 1.7.9
+          - omd:
+            - new option --no-autostart, -A for omd create (set AUTOSTART
+              to off right at creation, useful for test sites!)
+            - update: Ensure execution of the target versions hooks
+            - update: Added update log ~/var/log/update.log
+            - FIX: Fixed handling of comments in distro files (repairs "omd
+              setup" on some platforms)
+          - PNP4Nagios: Updated to version 0.6.21
+             - Added INIT hooks to npcd and pnp_gearman_worker scripts
+          - Support Ubuntu 12.10 (Quantal)
+          - Support Ubuntu 13.04 (Raising)
+          - Webinject: Update to 1.76
+          - NRPE: Update to 2.13
+          - check_multi: updated to 0.26_581
+          - Mod-Gearman: Updated to version 1.4.6
+          - Gearman: Updated to version 0.33
+            - added queue retention
+          - mod_python: Fixed our sys.path patch not to destory the default
+            sys.path set during interpreter initialization
+          - Dokuwiki: Now supporting the new multisite cookie format
+          - rrdtool: Update to version 1.4.8 
+            - compile and install Python binding
+          - nagios: Changed init script to kill still running processes during
+                "stop" call after 60 seconds waiting
+          - Added python module pysphere to make ESX monitoring easier
+          - Jmx4Perl: Update to 1.07 (Jolokia: 1.1.1)
+          - nsca: Cleaned up init script, better detection of stale pids / processes
+
+
+0.56     Sep 25 2012
+          - omd:
+            - Fixed problem updating omd sites without tmpfs: Not removing
+              whole tmp/ directory but only the contents
+            - Improved exception handling during omd update/cp/mv (Asking
+              for retry/accept/abort now)
+          - RPMS: Not checking for removed version during pkg release update
+                 (Does not mean omd version update.)
+          - check_multi: updated to 0.26_538
+          - Mod-Gearman: Updated to version 1.3.8
+          - Thruk: Update to 1.50
+          - Nagios Plugins: Update to 1.4.16
+          - PNP4Nagios: Update to 0.6.19
+          - NagVis: Update to 1.7.1
+          - Icinga: Update to 1.7.2
+          - Check_MK: Added 1.2.0p2 release
+          - Shinken: Update to 1.2
+          - jmx4perl: Update 1.05
+          - Support Ubuntu 12.04 (Precise)
+          - set log_initial_states=1 per default
+
+0.54     Apr 02 2012
+          - omd:
+            - FIX: Fixed "omd umount" command when running without specific site
+            - new option --kill for umount, rm and disable, that will kill
+              processes using tmpfs before unmounting it
+            - output argument help when calling omd COMMAND --help
+            - new option --conflict=HOW for non-interactive omd cp/mv/update.
+          - mod_python:
+            - Fix "omd stop apache", which was sometimes timing out
+            - Fix several DeprecationWarning messages when using python 2.6
+          - NagVis: Updated to NagVis 1.6.5
+          - Thruk: Update to 1.26
+          - RRDtool: Update to 1.4.7
+          - PNP4Nagios: Update to 0.6.17
+          - Webinject: Update to 1.72
+          - Mod-Gearman: Updated to version 1.2.6
+          - Gearman: Updated to version 0.25
+          - Debian 6.0: Added missing dependency for mod_python (libpython2.6)
+          - RPMs: Added "chkconfig --add <s>" commands before "chkconfig <s> on" commands
+          - Making etc/htpasswd file writeable by the site group
+          - Apache logrotate: Performing reload instead of restart
+          - Shinken:
+            - update to 1.0.1
+            - add MongoDB as backend for livestatus logs
+          - Switch Check_MK to version 1.1.12p7
+          - Support SLES11 SP2
+          - Dokuwiki
+            - Updated to Version 2012-01-25 Angua
+            - Template Vector now available
+
+0.52     Dec 22 2011
+          - Switch Check_MK to version 1.1.12p6 (Please refer to the migration notes
+            of Check_MK on http://mathias-kettner.de/checkmk_migration_notes.html!)
+          - FIX: WATO - Fixed permissions on conf.d directory for shared apache mode
+          - FIX: Fixed permissions for PHP temp files in shared mode
+          - Get rid of dummy host in a plain fresh OMD site
+          - NagVis
+            - Updated to NagVis 1.6.1
+              Note #1: The userfiles directory has been moved from var/nagvis/userfiles
+              to local/share/nagvis/htdocs/userfiles. The side individual files
+              shal be copied during update. The old files are left untouched in the
+              old directory. If everything works as expeced after update and you
+              don't plan to downgrade again you can savely remove the directory
+              var/nagvis/userfiles from your site
+              Note #2: During "omd update" omd might tell you that the file etc/nagvis/auth.db
+              is obsolete and you changed its contents. In normal cases you want to keep the
+              file (press k) to keep your user accounts, role assignments and permissions.
+            - local/ hierarchie can now handle .php files
+            - Moved nagvis-omd.ini.php to new conf.d/ directory
+          - OMD
+            - Added 'umount' option to unmount the ramdisk of a site
+            - Added 'TMPFS' config option to be able to run omd without the tmpfs filesystem
+            - Handling comments and empty lines in .info files correcty 
+            - Made 'setversion' work on broken links
+            - New commands 'disable' and 'enable'. OMD does not depend on the
+              home directories of disabled sites. This is useful in cluster environments.
+            - New option 'omd create --disabled' and 'omd init' which allows the creation
+              of a site with an empty home directory and afterwards population it. Again
+              this supports cluster environments.
+            - start, restart and reload now honor the option -f,--force: All
+              sites will then be affected, regardless of AUTOSTART
+            - FIX: omd update: page diff through less -F -X (-X is new). This fixes
+              a problem where the diff is not visible on dumb terminals like PuTTY.
+            - FIX: omd: site processes where missing supplementary groups when starting
+              the site as root via 'omd start SITE'
+            - FIX: omd update handled most files twice (without need). This is
+              fixed now.
+            - FIX: omd diff now correctly handles relative paths.
+            - FIX: omd diff now correctly instantiates templates before showing
+              diff in verboes mode
+            - FIX: omd umount skips unmounting on partly running sites
+          - updated to jmx4perl 1.04
+          - pnp4nagios
+            - npcd: Now detecting and handling stale pidfiles in init script
+          - updated to Mod-Gearman 1.1.1
+          - updated to Thruk 1.1.7
+          - updated to pnp4nagios 0.6.16
+          - updated to Icinga 1.6.1
+          - Support Ubuntu 11.10 (Oneiric)
+          - Cleanup up startscript of nagios
+          - New handler for Apache error messages (shows end of logfile)
+          - Ship own version of mailx alias nail as bin/mail
+          - Allow line continuation in nagios config with BACKSLASH LF
+          - Nagios: Skip emacs backup files while loading files from nagios.d directory
+          - Increased php memory limit on CentOS platforms to 64 MB
+          - dokuwiki auth: do not destroy htpasswd symlinks showing to another file
+
+0.50     Sep 20 2011
+          - Check_MK: fix problem with playing sounds
+          - Nagios:
+            - added patch to remove host alias from state retention.
+              Changes of the alias in your configuration will now be
+              effective.
+          - updated to check_oracle_health 1.7.0
+          - updated to check_mysql_health 2.1.6
+          - updated to Thruk 1.1.1
+          - updated to Mod-Gearman 1.0.10
+          - updated to Gearman 0.23
+          - updated to Webinject 1.68
+          - updated to PNP4Nagios 0.6.15
+          - OMD
+            - added 'reuse' option
+            - fix 'omd start core' (did simply nothing)
+            - added missing libperl dependency (fixes #217)
+            - fixed problem with mod_proxy sending duplicate pages
+            - fixed problem with mount on redhat/centos 6.0 (fixes #195)
+            - Fixed problem when doing 'omd restart' without mounted tmpfs
+          - Debian Package:
+            - Added the mandatory maintainer name
+          - mod_fcgid: Increased file upload limit from 128kb to 3MB
+          - npcd: Changed init script to find running processes with lost pidfile
+
+0.48     May 22 2011
+
+          - updated to Check_MK 1.1.10p3
+          - updated to Shinken 0.6.4
+          - updated to Thruk 1.0.4
+          - added Mod-Gearman 1.0.5
+          - added Gearmand 0.14
+          - updated Webinject 1.67
+          - updated to NagVis 1.5.9
+          - updated to PNP4Nagios 0.6.13
+          - added check_multi v439* (2011-02-19)
+          - OMD
+            - Added @omd setversion@ command to change the default version of OMD
+            - Improved merge handling during @omd update@
+            - @omd cp@ now supports --no-rrds and --no-logs. Also -N/--no-past which combines these options. Please read the updated man page for details.
+            - Fixed bug while removing sites
+            - Added @omd diff@ command to show added/deleted/changed files compared to a clean site.
+            - Restructured hooks
+            - added option --bare to @omd status@
