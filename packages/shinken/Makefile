@@ -60,7 +60,7 @@ MONGODB=mongodb-linux-i686-2.4.1
 ifeq ($(shell uname -m),x86_64)
   MONGODB=mongodb-linux-x86_64-2.4.1
 endif
-MONGODB=mongodb_2.4.10_armhf
+MONGODB=mongodb-linux-armhf-2.4.10
 MONGODB_FILE=$(MONGODB).tgz
 MONGODB_URL=http://fastdl.mongodb.org/linux/$(MONGODB_FILE)
 #
